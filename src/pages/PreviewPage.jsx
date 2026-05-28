@@ -7,6 +7,7 @@ import SEO from '../components/SEO.jsx';
 import { Button, buttonVariants } from '../components/ui/button.jsx';
 import { Card, CardContent } from '../components/ui/card.jsx';
 import { cn } from '../lib/utils.js';
+import { toMarkdownFileName } from '../utils/markdownHelpers.js';
 
 const PreviewPage = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const PreviewPage = () => {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = `${topic.trim() || 'blog-content'}.md`;
+      anchor.download = toMarkdownFileName(topic);
       anchor.click();
       URL.revokeObjectURL(url);
       toast.success('Đã tải xuống file Markdown.');

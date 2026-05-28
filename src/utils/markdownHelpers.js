@@ -37,6 +37,20 @@ export function toPreviewText(markdown) {
     .trim();
 }
 
+export function toMarkdownFileName(value, fallback = 'blog-content') {
+  const slug = String(value ?? '')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return `${slug || fallback}.md`;
+}
+
 function wrapText(value, start, end, replacement) {
   return `${value.slice(0, start)}${replacement}${value.slice(end)}`;
 }

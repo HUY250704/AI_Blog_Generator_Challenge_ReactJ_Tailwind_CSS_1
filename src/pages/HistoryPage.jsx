@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { toast } from 'sonner';
 import SEO from '../components/SEO.jsx';
-import { cleanMarkdownContent, toPreviewText } from '../utils/markdownHelpers.js';
+import { cleanMarkdownContent, toMarkdownFileName, toPreviewText } from '../utils/markdownHelpers.js';
 
 const HISTORY_KEY = 'ai-blog-history';
 
@@ -57,7 +57,7 @@ const HistoryPage = () => {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = `${previewItem.topic || 'blog-content'}.md`;
+      anchor.download = toMarkdownFileName(previewItem.topic);
       anchor.click();
       URL.revokeObjectURL(url);
       toast.success('Đã tải xuống file Markdown.');

@@ -2,6 +2,7 @@ import { Clock, Copy, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { toast } from 'sonner';
+import { toMarkdownFileName } from '../utils/markdownHelpers.js';
 
 const EditorWorkspace = ({
   topic,
@@ -45,7 +46,7 @@ const EditorWorkspace = ({
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = `${topic.trim() || 'blog-content'}.md`;
+      anchor.download = toMarkdownFileName(topic);
       anchor.click();
       URL.revokeObjectURL(url);
       toast.success('Đã tải xuống file Markdown.');
