@@ -221,7 +221,9 @@ export function getGeminiRateLimitSnapshot() {
   const now = Date.now();
   const state = readRateLimitState();
   const requests = pruneRecentRequests(state.requests, now);
-  const cooldownUntil = Math.max(state.cooldownUntil || 0, 0);
+  const requestWindowUntil =
+    requests.length >= FREE_TIER_REQUEST_LIMIT ? requests[0] + RATE_LIMIT_WINDOW_MS : 0;
+  const cooldownUntil = Math.max(state.cooldownUntil || 0, requestWindowUntil);
   const retryAfterMs = Math.max(cooldownUntil - now, 0);
 
   if (requests.length !== state.requests.length || (retryAfterMs === 0 && state.cooldownUntil)) {
