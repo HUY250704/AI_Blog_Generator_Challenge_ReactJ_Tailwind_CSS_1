@@ -1,4 +1,4 @@
-import { Copy, Download } from 'lucide-react';
+import { Clock, Copy, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { toast } from 'sonner';
@@ -9,12 +9,15 @@ const EditorWorkspace = ({
   status,
   error,
   warning,
+  rateLimit,
   onTopicChange,
   onGenerate
 }) => {
   const isLoading = status === 'loading';
   const hasContent = content.trim().length > 0;
-  const canGenerate = !isLoading && topic.trim().length > 0;
+  const retrySeconds = Math.max(0, Math.ceil((rateLimit?.retryAfterMs || 0) / 1000));
+  const isRateLimited = retrySeconds > 0;
+  const canGenerate = !isLoading && !isRateLimited && topic.trim().length > 0;
 
   const handleTopicEnter = event => {
     if (event.key !== 'Enter') return;
@@ -72,11 +75,17 @@ const EditorWorkspace = ({
             disabled={!canGenerate}
             className="inline-flex h-[45px] min-w-[151px] items-center justify-center rounded-[10px] border border-slate-300 bg-white px-5 text-[14px] font-semibold text-black transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-45 dark:border-slate-700 dark:bg-black dark:text-white dark:hover:bg-slate-900"
           >
-            {isLoading ? 'Đang tạo...' : 'Tạo Nội Dung'}
+            {isLoading ? 'Đang tạo...' : isRateLimited ? `${retrySeconds}s` : 'Tạo Nội Dung'}
           </button>
         </div>
 
         <p className="mt-[23px] text-[14px] text-slate-500 dark:text-slate-300">AI sẽ tạo ra nội dung blog dựa trên chủ đề bạn nhập</p>
+        {isRateLimited && (
+          <p className="mt-4 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/70 dark:bg-amber-950/40 dark:text-amber-200">
+            <Clock className="h-4 w-4 shrink-0" />
+            Gemini đang giới hạn lượt gọi. Có thể thử lại sau {retrySeconds} giây.
+          </p>
+        )}
         {error && <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         {warning && <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">{warning}</p>}
       </section>

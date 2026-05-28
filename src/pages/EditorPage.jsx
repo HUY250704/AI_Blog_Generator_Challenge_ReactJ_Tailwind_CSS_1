@@ -13,6 +13,7 @@ const EditorPage = () => {
     status,
     error,
     warning,
+    rateLimit,
     setTopic,
     setContent,
     generateContent
@@ -62,6 +63,7 @@ const EditorPage = () => {
         status={status}
         error={error}
         warning={warning}
+        rateLimit={rateLimit}
         onTopicChange={setTopic}
         onContentChange={setContent}
         onGenerate={generateContent}

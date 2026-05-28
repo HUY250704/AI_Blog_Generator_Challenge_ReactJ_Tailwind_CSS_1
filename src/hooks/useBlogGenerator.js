@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { generateBlogContent, getGeminiRateLimitSnapshot } from '../utils/geminiClient.js';
 
 const initialState = {
   topic: '',
@@ -15,6 +16,19 @@ export function useBlogGenerator() {
   const [status, setStatus] = useState(initialState.status);
   const [error, setError] = useState(initialState.error);
   const [warning, setWarning] = useState(initialState.warning);
+  const [rateLimit, setRateLimit] = useState(() => getGeminiRateLimitSnapshot());
+
+  useEffect(() => {
+    if (!rateLimit.isLimited) {
+      return undefined;
+    }
+
+    const timer = window.setInterval(() => {
+      setRateLimit(getGeminiRateLimitSnapshot());
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [rateLimit.isLimited]);
 
   const reset = () => {
     setTopic('');
@@ -39,22 +53,10 @@ export function useBlogGenerator() {
     setStatus('loading');
     setError(undefined);
     setWarning(undefined);
+    setRateLimit(getGeminiRateLimitSnapshot());
 
     try {
-      const response = await fetch('/api/generate-content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: cleanedTopic })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data?.content) {
-        setStatus('error');
-        setError(data?.message || 'Không thể tạo nội dung từ API.');
-        setWarning(undefined);
-        return;
-      }
+      const data = await generateBlogContent(cleanedTopic);
 
       setContent(data.content);
       setGeneratedTopic(cleanedTopic);
@@ -62,11 +64,13 @@ export function useBlogGenerator() {
       localStorage.setItem('ai-blog-content', data.content);
       setStatus('success');
       setError(undefined);
-      setWarning(data.warning || (data.fallback ? data.message || 'Đã dùng nội dung mock do API không khả dụng.' : undefined));
-    } catch {
+      setWarning(data.warning);
+      setRateLimit(getGeminiRateLimitSnapshot());
+    } catch (error) {
       setStatus('error');
-      setError('Lỗi mạng khi gọi API. Vui lòng thử lại.');
+      setError(error instanceof Error ? error.message : 'Lỗi mạng khi gọi API. Vui lòng thử lại.');
       setWarning(undefined);
+      setRateLimit(getGeminiRateLimitSnapshot());
     }
   };
 
@@ -77,6 +81,7 @@ export function useBlogGenerator() {
     status,
     error,
     warning,
+    rateLimit,
     setTopic,
     setContent,
     generateContent,
