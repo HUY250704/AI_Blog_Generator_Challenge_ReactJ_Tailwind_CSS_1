@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
-const REQUEST_TIMEOUT_MS = 45000;
+const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash-lite';
+const REQUEST_TIMEOUT_MS = 20000;
 const RATE_LIMIT_KEY = 'ai-blog-gemini-rate-limit';
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const FREE_TIER_REQUEST_LIMIT = 20;
